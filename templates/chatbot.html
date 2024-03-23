@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Have a fun chat</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #chat-container {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Have a fun chat</h1>
+        <div id="chat-container" class="mb-3">
+            <div id="chat-history"></div>
+        </div>
+        <form id="message-form" class="mb-3">
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="Type your message...">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and dependencies (you might already have these in your project) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatHistory = document.getElementById('chat-history');
+            const messageForm = document.getElementById('message-form');
+            const userInput = document.getElementById('user-input');
+
+            messageForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const userMessage = userInput.value.trim();
+                if (userMessage === '') return;
+
+                // Display user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.textContent = `You: ${userMessage}`;
+                userMessageDiv.classList.add('alert', 'alert-primary', 'mb-2');
+                chatHistory.appendChild(userMessageDiv);
+
+                // Send message to backend
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ user_input: userMessage }),
+                });
+
+                const data = await response.json();
+
+                // Display bot response
+                const botResponseDiv = document.createElement('div');
+                botResponseDiv.textContent = `ChatBot: ${data.bot_response}`;
+                botResponseDiv.classList.add('alert', 'alert-secondary', 'mb-2');
+                chatHistory.appendChild(botResponseDiv);
+
+                // Clear input field
+                userInput.value = '';
+
+                // Scroll to bottom of chat history
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            });
+        });
+    </script>
+</body>
+</html>
